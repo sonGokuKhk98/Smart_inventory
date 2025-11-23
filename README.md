@@ -2,8 +2,8 @@
 
 ## 🏆 Hackathon Submission
 **Event:** Agentic AI Hackathon with IBM watsonx Orchestrate  
-**Team:** [Your Name/Team Name]  
-**Date:** November 2024
+**Team:** G-Transformers 
+**Date:** November 2025
 
 ## 📋 Overview
 VisionFlow is a multi-agent AI system built on **IBM watsonx Orchestrate** that automates critical logistics workflows by bridging the gap between physical inspection and digital systems. Using computer vision (Google Gemini 2.5 Flash) and intelligent orchestration, VisionFlow eliminates manual data entry, reduces errors, and accelerates warehouse operations.
