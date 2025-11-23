@@ -1,0 +1,426 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Supply Chain Logistics API",
+    "description": "Box inspection + VAS label verification for supply chain automation (PRD v6)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "  https://42bd57fdad61.ngrok-free.appx ",
+      "description": "Production server (update with your ngrok URL)"
+    }
+  ],
+  "paths": {
+    "/inspect/box": {
+      "post": {
+        "operationId": "inspectBox",
+        "summary": "Inspect box condition",
+        "description": "Agent 1: Inbound Gatekeeper - Inspects box for damage (crushed, torn, water damage)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoxInspectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inspection result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoxInspectionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vas/verify_label": {
+      "post": {
+        "operationId": "verifyVASLabel",
+        "summary": "Verify VAS label matches product",
+        "description": "Agent 2: QC Specialist - PRD v6: Verifies label text (OCR) matches physical object (Visual). Detects 'Blue Shirt' label on 'Red Shirt' package.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VASInspectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Label verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelMatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wms/check": {
+      "post": {
+        "operationId": "checkWMS",
+        "summary": "Check order in WMS",
+        "description": "Agent 3: GACWare Specialist - Validates order details in warehouse management system",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WMSCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "WMS check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WMSResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ops/handle_exception": {
+      "post": {
+        "operationId": "handleException",
+        "summary": "Handle exception",
+        "description": "Agent 4: Fulfillment Specialist - Handles exceptions, holds orders, sends alerts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exception handling result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inspect/batch": {
+      "post": {
+        "operationId": "inspectBatch",
+        "summary": "Batch box inspection",
+        "description": "Agent 1: Inbound Gatekeeper - Inspects multiple boxes at once. Accepts array of image URLs or single image URL.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchInspectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch inspection results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchInspectionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BoxInspectionRequest": {
+        "type": "object",
+        "required": ["image_url"],
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "description": "URL of the box image to inspect"
+          },
+          "shipment_id": {
+            "type": "string",
+            "default": "UNKNOWN"
+          },
+          "expected_condition": {
+            "type": "string",
+            "default": "good"
+          }
+        }
+      },
+      "DefectFinding": {
+        "type": "object",
+        "properties": {
+          "defect_type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          },
+          "location": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "recommended_action": {
+            "type": "string"
+          }
+        }
+      },
+      "BoxInspectionResult": {
+        "type": "object",
+        "properties": {
+          "shipment_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "box_condition": {
+            "type": "string",
+            "enum": ["GOOD", "DAMAGED", "CRITICAL"]
+          },
+          "total_defects": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectFinding"
+            }
+          },
+          "can_ship": {
+            "type": "boolean"
+          },
+          "reasoning": {
+            "type": "string"
+          }
+        }
+      },
+      "VASInspectionRequest": {
+        "type": "object",
+        "required": ["image_url"],
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "description": "URL of the package image with label"
+          },
+          "station_id": {
+            "type": "string",
+            "default": "Station-1"
+          },
+          "order_id": {
+            "type": "string",
+            "default": "UNKNOWN"
+          },
+          "expected_sku": {
+            "type": "string",
+            "description": "Optional: Expected SKU on the label"
+          }
+        }
+      },
+      "LabelMatchResult": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "station_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "label_text": {
+            "type": "string",
+            "description": "Text read from label (OCR)"
+          },
+          "visual_object": {
+            "type": "string",
+            "description": "Product identified visually"
+          },
+          "match": {
+            "type": "boolean",
+            "description": "Do label and object match?"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "action_required": {
+            "type": "string",
+            "enum": ["PASS", "STOP_LINE", "RELABEL"]
+          },
+          "reasoning": {
+            "type": "string"
+          }
+        }
+      },
+      "WMSCheckRequest": {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          }
+        }
+      },
+      "WMSResult": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "expected_item": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["FOUND", "NOT_FOUND", "MISMATCH"]
+          },
+          "wms_data": {
+            "type": "object"
+          }
+        }
+      },
+      "ExceptionRequest": {
+        "type": "object",
+        "required": ["order_id", "exception_type", "details"],
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "exception_type": {
+            "type": "string",
+            "enum": ["LABEL_MISMATCH", "BOX_DAMAGED", "MISSING_ITEM"]
+          },
+          "details": {
+            "type": "string"
+          },
+          "station_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ExceptionResult": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["HELD", "QUARANTINED", "ALERT_SENT"]
+          },
+          "action_taken": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "BatchInspectionRequest": {
+        "type": "object",
+        "required": ["image_urls"],
+        "properties": {
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "URL of box image to inspect"
+            },
+            "description": "Array of image URLs to inspect. Can contain single or multiple URLs."
+          }
+        }
+      },
+      "BatchInspectionResult": {
+        "type": "object",
+        "properties": {
+          "total_boxes": {
+            "type": "integer",
+            "description": "Total number of boxes inspected"
+          },
+          "good_boxes": {
+            "type": "integer",
+            "description": "Number of boxes in good condition"
+          },
+          "damaged_boxes": {
+            "type": "integer",
+            "description": "Number of damaged boxes"
+          },
+          "can_ship_count": {
+            "type": "integer",
+            "description": "Number of boxes safe to ship"
+          },
+          "ship_rate": {
+            "type": "string",
+            "description": "Percentage of boxes safe to ship"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoxInspectionResult"
+            },
+            "description": "Detailed inspection results for each box"
+          }
+        }
+      }
+    }
+  }
+}
+

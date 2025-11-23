@@ -1,0 +1,416 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VisionFlow Logistics Intelligence API",
+    "description": "Real-time inspection report automation with multi-agent orchestration",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://d92eaa87c6f2.ngrok-free.app",
+      "description": "VisionFlow Backend (via ngrok)"
+    }
+  ],
+  "paths": {
+    "/v2/inspect/damage": {
+      "post": {
+        "summary": "Inspect Damage",
+        "description": "TOOL 1: For Inbound Gatekeeper Agent\nFocus: Physical Damage (Rust, Cracks, Water) using OpenCV",
+        "operationId": "inspectDamage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/inspect/label": {
+      "post": {
+        "summary": "Verify Label",
+        "description": "TOOL 2: For VAS Quality Controller Agent\nFocus: Label Mismatch (OCR vs Visual) using Gemini",
+        "operationId": "verifyLabel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VASRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/wms/check": {
+      "post": {
+        "summary": "Check Inventory",
+        "description": "TOOL 3: For WMS Librarian Agent\nSimulates GACWare Inventory Check",
+        "operationId": "checkInventory",
+        "parameters": [
+          {
+            "name": "sku",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "SKU"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/ops/resolve": {
+      "post": {
+        "summary": "Create Resolution",
+        "description": "TOOL 4: For Resolution Officer Agent\nExecutes RMAs, Holds, and Manifests",
+        "operationId": "createResolution",
+        "parameters": [
+          {
+            "name": "action_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Action Type"
+            }
+          },
+          {
+            "name": "details",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Details"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/batch/process": {
+      "post": {
+        "summary": "Batch Process",
+        "description": "TOOL 5: For Hub Director Agent\nProcess multiple inspections in parallel and return aggregated insights",
+        "operationId": "batchProcess",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "title": "Image URLs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DefectFinding": {
+        "properties": {
+          "defect_type": {
+            "type": "string",
+            "title": "Defect Type"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "recommended_action": {
+            "type": "string",
+            "title": "Recommended Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "defect_type",
+          "severity",
+          "location",
+          "confidence",
+          "recommended_action"
+        ],
+        "title": "DefectFinding"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InspectionRequest": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image URL"
+          },
+          "shipment_id": {
+            "type": "string",
+            "title": "Shipment ID"
+          },
+          "expected_condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Condition",
+            "default": "good"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url",
+          "shipment_id"
+        ],
+        "title": "InspectionRequest"
+      },
+      "InspectionResult": {
+        "properties": {
+          "shipment_id": {
+            "type": "string",
+            "title": "Shipment ID"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "total_defects": {
+            "type": "integer",
+            "title": "Total Defects"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/DefectFinding"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "overall_status": {
+            "type": "string",
+            "title": "Overall Status"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shipment_id",
+          "timestamp",
+          "total_defects",
+          "findings",
+          "overall_status",
+          "reasoning"
+        ],
+        "title": "InspectionResult"
+      },
+      "VASRequest": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image URL"
+          },
+          "expected_label": {
+            "type": "string",
+            "title": "Expected Label"
+          },
+          "expected_sku": {
+            "type": "string",
+            "title": "Expected SKU"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url",
+          "expected_label",
+          "expected_sku"
+        ],
+        "title": "VASRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
+
+
+

@@ -1,0 +1,381 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VisionFlow Procurement Automation API",
+    "description": "Multi-Agent System for End-to-End Procure-to-Pay Automation",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://YOUR-NGROK-URL.ngrok-free.app",
+      "description": "Procurement Automation Backend (via ngrok)"
+    }
+  ],
+  "paths": {
+    "/procurement/extract_document": {
+      "post": {
+        "summary": "Extract Document Data",
+        "description": "AGENT 2: Document Intelligence Specialist - Extracts structured data from procurement documents using OCR + Vision",
+        "operationId": "extractDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentExtractionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentExtractionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/procurement/check_budget": {
+      "post": {
+        "summary": "Check Budget",
+        "description": "AGENT 3: Budget & Compliance Specialist - Validates budget availability and determines approval requirements",
+        "operationId": "checkBudget",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/procurement/create_po": {
+      "post": {
+        "summary": "Create Purchase Order",
+        "description": "AGENT 4: Purchase Order Specialist - Creates purchase order from requisition data",
+        "operationId": "createPO",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePORequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/POResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/procurement/match_invoice": {
+      "post": {
+        "summary": "Match Invoice to PO",
+        "description": "AGENT 4: Purchase Order Specialist - Performs 3-way match (PO, Receiving, Invoice)",
+        "operationId": "matchInvoice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchInvoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchInvoiceResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/procurement/approve_payment": {
+      "post": {
+        "summary": "Approve Payment",
+        "description": "AGENT 5: Payment Processing Specialist - Handles invoice approval and payment processing",
+        "operationId": "approvePayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovePaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Service is healthy"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DocumentExtractionRequest": {
+        "type": "object",
+        "properties": {
+          "document_url": {
+            "type": "string",
+            "description": "URL of the document image"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": ["invoice", "po", "requisition", "receipt"],
+            "description": "Type of document"
+          }
+        },
+        "required": ["document_url", "document_type"]
+      },
+      "DocumentExtractionResult": {
+        "type": "object",
+        "properties": {
+          "document_type": {
+            "type": "string"
+          },
+          "extracted_data": {
+            "type": "object",
+            "description": "Structured data extracted from document"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "BudgetCheckRequest": {
+        "type": "object",
+        "properties": {
+          "department": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "cost_center": {
+            "type": "string"
+          }
+        },
+        "required": ["department", "amount"]
+      },
+      "BudgetCheckResult": {
+        "type": "object",
+        "properties": {
+          "budget_available": {
+            "type": "boolean"
+          },
+          "available_budget": {
+            "type": "number"
+          },
+          "approval_required": {
+            "type": "boolean"
+          },
+          "approval_chain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "compliance_status": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "CreatePORequest": {
+        "type": "object",
+        "properties": {
+          "requisition_data": {
+            "type": "object"
+          },
+          "vendor_name": {
+            "type": "string"
+          },
+          "department": {
+            "type": "string"
+          }
+        },
+        "required": ["requisition_data", "vendor_name", "department"]
+      },
+      "POResult": {
+        "type": "object",
+        "properties": {
+          "po_number": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "vendor_name": {
+            "type": "string"
+          },
+          "total_amount": {
+            "type": "number"
+          },
+          "created_date": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "MatchInvoiceRequest": {
+        "type": "object",
+        "properties": {
+          "invoice_data": {
+            "type": "object"
+          },
+          "po_number": {
+            "type": "string"
+          },
+          "receipt_data": {
+            "type": "object"
+          }
+        },
+        "required": ["invoice_data", "po_number"]
+      },
+      "MatchInvoiceResult": {
+        "type": "object",
+        "properties": {
+          "match_status": {
+            "type": "string",
+            "enum": ["MATCHED", "PARTIAL_MATCH", "MISMATCH"]
+          },
+          "po_number": {
+            "type": "string"
+          },
+          "invoice_number": {
+            "type": "string"
+          },
+          "discrepancies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "match_confidence": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprovePaymentRequest": {
+        "type": "object",
+        "properties": {
+          "invoice_id": {
+            "type": "string"
+          },
+          "invoice_data": {
+            "type": "object"
+          },
+          "match_result": {
+            "type": "object"
+          },
+          "approval_status": {
+            "type": "string",
+            "enum": ["APPROVED", "REJECTED", "HOLD"]
+          }
+        },
+        "required": ["invoice_id", "invoice_data", "match_result", "approval_status"]
+      },
+      "PaymentResult": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "payment_amount": {
+            "type": "number"
+          },
+          "payment_date": {
+            "type": "string"
+          },
+          "duplicate_detected": {
+            "type": "boolean"
+          },
+          "exception_reason": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+

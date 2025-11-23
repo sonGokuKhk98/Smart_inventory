@@ -1,0 +1,721 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Supply Chain Logistics API",
+    "description": "Box inspection + VAS label verification for supply chain automation",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://6681f65112a9.ngrok-free.app",
+      "description": "Production Server (ngrok)"
+    },
+    {
+      "url": "http://localhost:8000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/inspect/box": {
+      "post": {
+        "summary": "Inspect Box",
+        "description": "Agent 1: Inbound Gatekeeper\nInspects box condition for damage (crushed, torn, water damage)",
+        "operationId": "inspectBox",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoxInspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoxInspectionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vas/verify_label": {
+      "post": {
+        "summary": "Verify Vas Label",
+        "description": "Agent 2: QC Specialist (VAS Quality Controller)\nPRD v6: Verifies label text (OCR) matches physical object (Visual)\nThis is the \"Blue Shirt label on Red Shirt\" detection",
+        "operationId": "verifyVASLabel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VASInspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelMatchResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wms/check": {
+      "post": {
+        "summary": "Check Wms",
+        "description": "Agent 3: GACWare Specialist (WMS Librarian)\nChecks order details in warehouse management system",
+        "operationId": "checkWMS",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WMSCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WMSResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ops/handle_exception": {
+      "post": {
+        "summary": "Handle Exception",
+        "description": "Agent 4: Fulfillment Specialist (Resolution Officer)\nHandles exceptions: holds orders, sends alerts, creates tickets",
+        "operationId": "handleException",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inspect/batch": {
+      "post": {
+        "summary": "Inspect Batch",
+        "description": "Agent 1: Inbound Gatekeeper - Batch box inspection. Inspects multiple boxes at once. Accepts array of image URLs or single image URL.",
+        "operationId": "inspectBatch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchInspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchInspectionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BoxInspectionRequest": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "shipment_id": {
+            "title": "Shipment Id",
+            "default": "UNKNOWN",
+            "type": "string",
+            "nullable": true
+          },
+          "expected_condition": {
+            "title": "Expected Condition",
+            "default": "good",
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "STANDARD"
+          },
+          "temperature": {
+            "title": "Temperature",
+            "type": "number",
+            "nullable": true
+          },
+          "dimensions": {
+            "title": "Dimensions",
+            "additionalProperties": true,
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "BoxInspectionRequest"
+      },
+      "BoxInspectionResult": {
+        "properties": {
+          "shipment_id": {
+            "type": "string",
+            "title": "Shipment Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "box_condition": {
+            "type": "string",
+            "title": "Box Condition"
+          },
+          "total_defects": {
+            "type": "integer",
+            "title": "Total Defects"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/DefectFinding"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "can_ship": {
+            "type": "boolean",
+            "title": "Can Ship"
+          },
+          "conditional_acceptance": {
+            "type": "boolean",
+            "title": "Conditional Acceptance",
+            "default": false
+          },
+          "volumetric_check": {
+            "type": "string",
+            "title": "Volumetric Check",
+            "default": "PASS"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shipment_id",
+          "timestamp",
+          "box_condition",
+          "total_defects",
+          "findings",
+          "can_ship",
+          "reasoning"
+        ],
+        "title": "BoxInspectionResult"
+      },
+      "DefectFinding": {
+        "properties": {
+          "defect_type": {
+            "type": "string",
+            "title": "Defect Type"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "recommended_action": {
+            "type": "string",
+            "title": "Recommended Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "defect_type",
+          "severity",
+          "location",
+          "confidence",
+          "recommended_action"
+        ],
+        "title": "DefectFinding"
+      },
+      "ExceptionRequest": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "exception_type": {
+            "type": "string",
+            "title": "Exception Type"
+          },
+          "details": {
+            "type": "string",
+            "title": "Details"
+          },
+          "station_id": {
+            "title": "Station Id",
+            "type": "string",
+            "nullable": true
+          },
+          "vendor_id": {
+            "title": "Vendor Id",
+            "default": "VENDOR-001",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "exception_type",
+          "details"
+        ],
+        "title": "ExceptionRequest"
+      },
+      "ExceptionResult": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "title": "Ticket Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "action_taken": {
+            "type": "string",
+            "title": "Action Taken"
+          },
+          "vendor_email_draft": {
+            "title": "Vendor Email Draft",
+            "type": "string",
+            "nullable": true
+          },
+          "carrier_rates": {
+            "title": "Carrier Rates",
+            "additionalProperties": true,
+            "type": "object",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "order_id",
+          "status",
+          "action_taken",
+          "timestamp"
+        ],
+        "title": "ExceptionResult"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LabelMatchResult": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "station_id": {
+            "type": "string",
+            "title": "Station Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "label_text": {
+            "type": "string",
+            "title": "Label Text"
+          },
+          "visual_object": {
+            "type": "string",
+            "title": "Visual Object"
+          },
+          "match": {
+            "type": "boolean",
+            "title": "Match"
+          },
+          "kitting_verified": {
+            "type": "boolean",
+            "title": "Kitting Verified",
+            "default": true
+          },
+          "aesthetic_score": {
+            "type": "number",
+            "title": "Aesthetic Score",
+            "default": 1.0
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "action_required": {
+            "type": "string",
+            "title": "Action Required"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "station_id",
+          "timestamp",
+          "label_text",
+          "visual_object",
+          "match",
+          "confidence",
+          "action_required",
+          "reasoning"
+        ],
+        "title": "LabelMatchResult"
+      },
+      "VASInspectionRequest": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "station_id": {
+            "title": "Station Id",
+            "default": "Station-1",
+            "type": "string",
+            "nullable": true
+          },
+          "order_id": {
+            "title": "Order Id",
+            "default": "UNKNOWN",
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority",
+            "default": "STANDARD"
+          },
+          "expected_sku": {
+            "title": "Expected Sku",
+            "type": "string",
+            "nullable": true
+          },
+          "kitting_list": {
+            "title": "Kitting List",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "aesthetic_check": {
+            "type": "boolean",
+            "title": "Aesthetic Check",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "VASInspectionRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WMSCheckRequest": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "sku": {
+            "title": "Sku",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id"
+        ],
+        "title": "WMSCheckRequest"
+      },
+      "WMSResult": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "expected_item": {
+            "type": "string",
+            "title": "Expected Item"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "predicted_cause": {
+            "title": "Predicted Cause",
+            "type": "string",
+            "nullable": true
+          },
+          "optimization_suggestion": {
+            "title": "Optimization Suggestion",
+            "type": "string",
+            "nullable": true
+          },
+          "wms_data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Wms Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "sku",
+          "expected_item",
+          "quantity",
+          "status",
+          "wms_data"
+        ],
+        "title": "WMSResult"
+      },
+      "BatchInspectionRequest": {
+        "type": "object",
+        "required": ["image_urls"],
+        "properties": {
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "URL of box image to inspect"
+            },
+            "description": "Array of image URLs to inspect. Can contain single or multiple URLs."
+          }
+        },
+        "title": "BatchInspectionRequest"
+      },
+      "BatchInspectionResult": {
+        "type": "object",
+        "properties": {
+          "total_boxes": {
+            "type": "integer",
+            "description": "Total number of boxes inspected",
+            "title": "Total Boxes"
+          },
+          "good_boxes": {
+            "type": "integer",
+            "description": "Number of boxes in good condition",
+            "title": "Good Boxes"
+          },
+          "damaged_boxes": {
+            "type": "integer",
+            "description": "Number of damaged boxes",
+            "title": "Damaged Boxes"
+          },
+          "can_ship_count": {
+            "type": "integer",
+            "description": "Number of boxes safe to ship",
+            "title": "Can Ship Count"
+          },
+          "ship_rate": {
+            "type": "string",
+            "description": "Percentage of boxes safe to ship",
+            "title": "Ship Rate"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoxInspectionResult"
+            },
+            "description": "Detailed inspection results for each box",
+            "title": "Results"
+          }
+        },
+        "title": "BatchInspectionResult"
+      }
+    }
+  }
+}

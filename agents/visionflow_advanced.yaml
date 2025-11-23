@@ -1,0 +1,169 @@
+name: VisionFlow Advanced Inspector
+description: Production-grade logistics inspection with real computer vision and AI reasoning
+version: 2.0.0
+
+# Digital Skills (Tools)
+skills:
+  - name: inspect_advanced
+    description: |
+      Inspect shipment using real OpenCV computer vision + Gemini AI reasoning.
+      Detects rust, physical damage, water stains, and other defects.
+      Returns detailed findings with severity levels and recommended actions.
+    endpoint: /v2/inspect/advanced
+    method: POST
+    input_schema:
+      type: object
+      properties:
+        image_url:
+          type: string
+          description: URL of shipment image to inspect
+        shipment_id:
+          type: string
+          description: Unique shipment identifier
+        expected_condition:
+          type: string
+          description: Expected condition (default "good")
+      required:
+        - image_url
+        - shipment_id
+    output_schema:
+      type: object
+      properties:
+        shipment_id:
+          type: string
+        timestamp:
+          type: string
+        total_defects:
+          type: integer
+        findings:
+          type: array
+          items:
+            type: object
+        overall_status:
+          type: string
+          enum: [PASS, FAIL, QUARANTINE]
+        reasoning:
+          type: string
+
+  - name: analyze_document
+    description: |
+      Extract structured data from inspection reports, packing lists, 
+      bills of lading, and other logistics documents.
+      Uses Gemini OCR + extraction to digitize paper workflows.
+    endpoint: /v2/analyze/document
+    method: POST
+    input_schema:
+      type: object
+      properties:
+        document_url:
+          type: string
+          description: URL of document image
+        document_type:
+          type: string
+          enum: [inspection_report, packing_list, bill_of_lading]
+      required:
+        - document_url
+        - document_type
+    output_schema:
+      type: object
+      properties:
+        document_id:
+          type: string
+        date:
+          type: string
+        items:
+          type: array
+        defects_found:
+          type: array
+        summary:
+          type: string
+
+  - name: batch_process
+    description: |
+      Process multiple shipment inspections in parallel.
+      Returns aggregated statistics and detailed results for each inspection.
+      Ideal for end-of-day processing or bulk quality audits.
+    endpoint: /v2/batch/process
+    method: POST
+    input_schema:
+      type: array
+      items:
+        type: string
+        description: Image URL
+    output_schema:
+      type: object
+      properties:
+        total_inspections:
+          type: integer
+        total_defects:
+          type: integer
+        critical_failures:
+          type: integer
+        pass_rate:
+          type: string
+        detailed_results:
+          type: array
+
+# Agentic Behavior Configuration
+reasoning:
+  enabled: true
+  model: watsonx.ai/granite-3.0-8b-instruct
+  strategy: chain-of-thought
+  prompt_template: |
+    You are a logistics quality control expert with 20 years of experience.
+    
+    Analyze the inspection data and provide:
+    1. Root cause analysis
+    2. Business impact assessment
+    3. Recommended actions
+    4. Vendor quality implications
+    
+    Be thorough, realistic, and business-focused.
+
+# Agent Memory (for learning patterns)
+memory:
+  enabled: true
+  store: redis
+  retention_days: 30
+  track:
+    - defect_patterns
+    - vendor_quality_scores
+    - seasonal_trends
+
+# Collaboration with other agents
+collaboration:
+  supervisor: Hub Director
+  peers:
+    - WMS Librarian
+    - Resolution Officer
+  escalation_rules:
+    - condition: severity == "CRITICAL"
+      action: notify_supervisor
+    - condition: total_defects > 5
+      action: trigger_vendor_review
+
+# Performance & Monitoring
+monitoring:
+  log_level: INFO
+  metrics:
+    - inspection_time
+    - defect_detection_rate
+    - false_positive_rate
+  alerts:
+    - condition: inspection_time > 5s
+      severity: WARNING
+    - condition: false_positive_rate > 0.1
+      severity: CRITICAL
+
+# Deployment Configuration
+deployment:
+  replicas: 3
+  auto_scaling:
+    min: 1
+    max: 10
+    target_cpu: 70
+  health_check:
+    endpoint: /health
+    interval: 30s
+    timeout: 5s
+

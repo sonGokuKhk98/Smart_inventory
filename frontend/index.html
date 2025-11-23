@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionFlow Logistics Hub</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating background elements */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::before {
+            background: var(--primary);
+            top: -250px;
+            left: -250px;
+        }
+
+        body::after {
+            background: var(--secondary);
+            bottom: -250px;
+            right: -250px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Box Styles */
+        .floating-box {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 48px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating-box:nth-child(2) {
+            animation-delay: -2s;
+        }
+
+        .floating-box:nth-child(3) {
+            animation-delay: -4s;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header-section h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Redirect Button */
+        .redirect-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 
+                0 4px 20px rgba(99, 102, 241, 0.4),
+                0 0 0 0 rgba(99, 102, 241, 0.5);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .redirect-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 30px rgba(99, 102, 241, 0.6),
+                0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .redirect-button:active {
+            transform: translateY(0);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-zone:hover::before {
+            left: 100%;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-zone:hover .upload-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .upload-zone p {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results */
+        .result-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .status-GOOD {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-DAMAGED {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-CRITICAL {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .status-MATCH {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-MISMATCH {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .floating-box {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .header-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <span class="subtitle">VisionFlow</span>
+            <h1>Logistics Hub</h1>
+            <p>AI-Powered Supply Chain Management</p>
+            <a href="https://au-syd.watson-orchestrate.cloud.ibm.com/chat" class="redirect-button">
+                <span>🚀</span>
+                <span>Open watsonx Chat</span>
+                <span>→</span>
+            </a>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="floating-box">
+            <span class="subtitle">Dashboard</span>
+            <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Real-Time Statistics</h1>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;" id="totalProcessed">1,247</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Total Processed</div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);" id="successRate">98.5%</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Success Rate</div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--warning);" id="activeAgents">5</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Active Agents</div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);" id="avgProcessingTime">2.3s</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Avg Processing</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 12px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);" id="boxesInspected">892</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Boxes Inspected</div>
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 12px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);" id="labelsVerified">1,103</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Labels Verified</div>
+                </div>
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); border-radius: 12px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning);" id="exceptionsHandled">23</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Exceptions</div>
+                </div>
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); border-radius: 12px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary);" id="wmsChecks">456</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">WMS Checks</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Flow Visualization -->
+        <div class="floating-box">
+            <span class="subtitle">Agent Architecture</span>
+            <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Available Agents & Workflow</h1>
+            
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">Agent Status</h3>
+                <div id="agentStatusList" style="display: grid; gap: 1rem;">
+                    <!-- Agent status cards will be populated here -->
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main);">Process Flow</h3>
+                <div id="processFlow" style="position: relative; padding: 2rem; background: rgba(0, 0, 0, 0.2); border-radius: 16px; overflow-x: auto;">
+                    <!-- Process flow diagram will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload & Analysis Box -->
+        <div class="floating-box">
+            <span class="subtitle">Image Analysis</span>
+            <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Upload & Analyze</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="setMode('inspect')">Inspect Box</button>
+                <button class="tab" onclick="setMode('vas')">Verify Label</button>
+            </div>
+
+            <form id="uploadForm">
+                <div class="upload-zone" id="dropZone">
+                    <span class="upload-icon">📸</span>
+                    <p>Drag & Drop image here</p>
+                    <p class="file-info">or click to browse</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none">
+                </div>
+                <div id="fileName" class="file-info" style="text-align: center; margin-bottom: 1.5rem;"></div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="priority">
+                        <option value="STANDARD">Standard</option>
+                        <option value="RUSH">Rush</option>
+                        <option value="CRITICAL">Critical</option>
+                    </select>
+                </div>
+
+                <div id="vasFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Expected SKU (Optional)</label>
+                        <input type="text" id="expectedSku" placeholder="e.g., SKU-123">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Analyze Shipment</button>
+            </form>
+
+            <div id="resultsContainer"></div>
+        </div>
+
+        <!-- Inventory Management Box -->
+        <div class="floating-box">
+            <span class="subtitle">Inventory Management</span>
+            <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Current Inventory</h1>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Total Items</div>
+                    <div style="font-size: 1.5rem; font-weight: 600;" id="totalItems">12</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Low Stock</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning);" id="lowStockCount">3</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Out of Stock</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);" id="outOfStockCount">1</div>
+                </div>
+            </div>
+
+            <div id="inventoryList" style="max-height: 500px; overflow-y: auto;">
+                <!-- Inventory items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const form = document.getElementById('uploadForm');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const vasFields = document.getElementById('vasFields');
+        const submitBtn = document.getElementById('submitBtn');
+        const dropZone = document.getElementById('dropZone');
+
+        let currentMode = 'inspect';
+        let selectedFile = null;
+
+        // Mode Switching
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (mode === 'vas') {
+                vasFields.style.display = 'block';
+                submitBtn.textContent = 'Verify Label';
+            } else {
+                vasFields.style.display = 'none';
+                submitBtn.textContent = 'Analyze Shipment';
+            }
+        }
+
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            fileNameDisplay.textContent = `Selected: ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                dropZone.style.backgroundImage = `url(${e.target.result})`;
+                dropZone.style.backgroundSize = 'cover';
+                dropZone.style.backgroundPosition = 'center';
+                dropZone.querySelector('.upload-icon').style.opacity = '0';
+                dropZone.querySelectorAll('p').forEach(p => p.style.opacity = '0');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showLoadingState() {
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing image...</p>
+                </div>
+            `;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+        }
+
+        function hideLoadingState() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = currentMode === 'vas' ? 'Verify Label' : 'Analyze Shipment';
+        }
+
+        // Form Submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedFile) {
+                alert('Please select an image first');
+                return;
+            }
+
+            showLoadingState();
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('priority', document.getElementById('priority').value);
+            formData.append('shipment_id', 'SHIP-' + Math.floor(Math.random() * 10000));
+
+            if (currentMode === 'vas') {
+                const sku = document.getElementById('expectedSku').value;
+                if (sku) formData.append('expected_sku', sku);
+                formData.append('order_id', 'ORD-' + Math.floor(Math.random() * 10000));
+            }
+
+            const endpoint = currentMode === 'inspect'
+                ? 'http://localhost:8000/inspect/box'
+                : 'http://localhost:8000/vas/verify_label';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                displayError(`Error: ${error.message}`);
+            } finally {
+                hideLoadingState();
+            }
+        });
+
+        function displayResults(data) {
+            if (currentMode === 'inspect') {
+                displayBoxInspectionResults(data);
+            } else {
+                displayLabelVerificationResults(data);
+            }
+        }
+
+        function displayBoxInspectionResults(data) {
+            const findingsHTML = data.findings && data.findings.length > 0
+                ? data.findings.map(f => `
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-main);">${f.defect_type}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">${f.location}</div>
+                            </div>
+                            <span class="status-badge status-${f.severity}">${f.severity}</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">${f.recommended_action}</div>
+                    </div>
+                `).join('')
+                : '<p style="color: var(--text-muted);">No defects found</p>';
+
+            resultsContainer.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Shipment ID</div>
+                            <div style="font-weight: 600; font-size: 1.2rem;">${data.shipment_id}</div>
+                        </div>
+                        <div class="status-badge status-${data.box_condition}">${data.box_condition}</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Can Ship</div>
+                                <div style="font-weight: 600; color: ${data.can_ship ? 'var(--success)' : 'var(--error)'}; font-size: 1.1rem;">
+                                    ${data.can_ship ? '✓ YES' : '✗ NO'}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Total Defects</div>
+                                <div style="font-weight: 600; font-size: 1.1rem;">${data.total_defects}</div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Reasoning</div>
+                            <div style="font-size: 0.95rem; line-height: 1.6;">${data.reasoning}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 0.75rem;">Findings</div>
+                        ${findingsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayLabelVerificationResults(data) {
+            resultsContainer.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Order ID</div>
+                            <div style="font-weight: 600; font-size: 1.2rem;">${data.order_id}</div>
+                        </div>
+                        <div class="status-badge status-${data.match ? 'MATCH' : 'MISMATCH'}">
+                            ${data.match ? 'MATCH' : 'MISMATCH'}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Label Text</div>
+                                <div style="font-weight: 600; font-size: 1.1rem;">${data.label_text}</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Visual Object</div>
+                                <div style="font-weight: 600; font-size: 1.1rem;">${data.visual_object}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Action Required</div>
+                            <div style="font-weight: 600; color: ${data.match ? 'var(--success)' : 'var(--error)'}; font-size: 1.1rem;">${data.action_required}</div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Reasoning</div>
+                            <div style="font-size: 0.95rem; line-height: 1.6;">${data.reasoning}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayError(message) {
+            resultsContainer.innerHTML = `
+                <div class="result-card">
+                    <div class="status-badge status-CRITICAL" style="margin-bottom: 1rem;">ERROR</div>
+                    <p style="color: var(--error);">${message}</p>
+                </div>
+            `;
+        }
+
+        // Inventory Management
+        const dummyInventory = [
+            {
+                sku: "BANNER-LANDSCAPE-001",
+                name: "Banner Landscape Design",
+                currentStock: 45,
+                reorderPoint: 20,
+                maxStock: 100,
+                status: "IN_STOCK",
+                location: "Warehouse A - Bay 12",
+                lastUpdated: "2024-01-15 10:30 AM",
+                category: "Design Assets"
+            },
+            {
+                sku: "IMAGE-001",
+                name: "Image Asset 1",
+                currentStock: 8,
+                reorderPoint: 15,
+                maxStock: 50,
+                status: "LOW_STOCK",
+                location: "Warehouse B - Bay 5",
+                lastUpdated: "2024-01-15 09:15 AM",
+                category: "Digital Assets"
+            },
+            {
+                sku: "OFFICE-CHAIR-001",
+                name: "Ergonomic Office Chair",
+                currentStock: 0,
+                reorderPoint: 10,
+                maxStock: 30,
+                status: "OUT_OF_STOCK",
+                location: "Warehouse A - Bay 8",
+                lastUpdated: "2024-01-14 03:45 PM",
+                category: "Furniture"
+            },
+            {
+                sku: "DESK-LAMP-002",
+                name: "LED Desk Lamp",
+                currentStock: 12,
+                reorderPoint: 15,
+                maxStock: 50,
+                status: "LOW_STOCK",
+                location: "Warehouse B - Bay 3",
+                lastUpdated: "2024-01-15 11:20 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "MONITOR-003",
+                name: "27\" 4K Monitor",
+                currentStock: 25,
+                reorderPoint: 10,
+                maxStock: 30,
+                status: "IN_STOCK",
+                location: "Warehouse A - Bay 15",
+                lastUpdated: "2024-01-15 08:00 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "KEYBOARD-004",
+                name: "Mechanical Keyboard",
+                currentStock: 150,
+                reorderPoint: 25,
+                maxStock: 100,
+                status: "OVERSTOCKED",
+                location: "Warehouse B - Bay 20",
+                lastUpdated: "2024-01-14 02:30 PM",
+                category: "Electronics"
+            },
+            {
+                sku: "MOUSE-005",
+                name: "Wireless Mouse",
+                currentStock: 35,
+                reorderPoint: 20,
+                maxStock: 60,
+                status: "IN_STOCK",
+                location: "Warehouse A - Bay 7",
+                lastUpdated: "2024-01-15 10:45 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "HEADPHONES-006",
+                name: "Noise-Cancelling Headphones",
+                currentStock: 18,
+                reorderPoint: 15,
+                maxStock: 40,
+                status: "IN_STOCK",
+                location: "Warehouse B - Bay 9",
+                lastUpdated: "2024-01-15 09:30 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "STANDING-DESK-007",
+                name: "Adjustable Standing Desk",
+                currentStock: 5,
+                reorderPoint: 10,
+                maxStock: 25,
+                status: "LOW_STOCK",
+                location: "Warehouse A - Bay 22",
+                lastUpdated: "2024-01-14 04:15 PM",
+                category: "Furniture"
+            },
+            {
+                sku: "WEBCAM-008",
+                name: "HD Webcam",
+                currentStock: 42,
+                reorderPoint: 20,
+                maxStock: 80,
+                status: "IN_STOCK",
+                location: "Warehouse B - Bay 11",
+                lastUpdated: "2024-01-15 11:00 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "DOCKING-STATION-009",
+                name: "USB-C Docking Station",
+                currentStock: 28,
+                reorderPoint: 15,
+                maxStock: 50,
+                status: "IN_STOCK",
+                location: "Warehouse A - Bay 18",
+                lastUpdated: "2024-01-15 08:30 AM",
+                category: "Electronics"
+            },
+            {
+                sku: "CABLE-MGMT-010",
+                name: "Cable Management Kit",
+                currentStock: 60,
+                reorderPoint: 30,
+                maxStock: 100,
+                status: "IN_STOCK",
+                location: "Warehouse B - Bay 14",
+                lastUpdated: "2024-01-14 01:20 PM",
+                category: "Accessories"
+            }
+        ];
+
+        function getStatusBadge(status) {
+            const statusConfig = {
+                "IN_STOCK": { class: "status-GOOD", label: "In Stock", color: "var(--success)" },
+                "LOW_STOCK": { class: "status-DAMAGED", label: "Low Stock", color: "var(--warning)" },
+                "OUT_OF_STOCK": { class: "status-CRITICAL", label: "Out of Stock", color: "var(--error)" },
+                "OVERSTOCKED": { class: "status-DAMAGED", label: "Overstocked", color: "var(--warning)" }
+            };
+            const config = statusConfig[status] || statusConfig["IN_STOCK"];
+            return `<span class="status-badge ${config.class}" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">${config.label}</span>`;
+        }
+
+        function getStockPercentage(current, max) {
+            return Math.round((current / max) * 100);
+        }
+
+        function getStockBarColor(percentage, status) {
+            if (status === "OUT_OF_STOCK") return "var(--error)";
+            if (status === "LOW_STOCK") return "var(--warning)";
+            if (status === "OVERSTOCKED") return "var(--warning)";
+            if (percentage >= 80) return "var(--success)";
+            if (percentage >= 50) return "var(--primary)";
+            return "var(--warning)";
+        }
+
+        function renderInventory() {
+            const inventoryList = document.getElementById('inventoryList');
+            const lowStockCount = dummyInventory.filter(item => item.status === "LOW_STOCK").length;
+            const outOfStockCount = dummyInventory.filter(item => item.status === "OUT_OF_STOCK").length;
+
+            document.getElementById('lowStockCount').textContent = lowStockCount;
+            document.getElementById('outOfStockCount').textContent = outOfStockCount;
+
+            inventoryList.innerHTML = dummyInventory.map(item => {
+                const stockPercentage = getStockPercentage(item.currentStock, item.maxStock);
+                const barColor = getStockBarColor(stockPercentage, item.status);
+                
+                return `
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);">${item.name}</div>
+                                    ${getStatusBadge(item.status)}
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                    <strong>SKU:</strong> ${item.sku}
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                    <strong>Location:</strong> ${item.location} | <strong>Category:</strong> ${item.category}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <div>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Current Stock:</span>
+                                    <span style="font-weight: 600; font-size: 1.1rem; margin-left: 0.5rem; color: ${barColor};">${item.currentStock}</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.5rem;">/ ${item.maxStock}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Reorder Point</div>
+                                    <div style="font-weight: 600; color: var(--warning);">${item.reorderPoint}</div>
+                                </div>
+                            </div>
+                            <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; height: 8px; overflow: hidden; position: relative;">
+                                <div style="background: ${barColor}; height: 100%; width: ${stockPercentage}%; transition: width 0.3s ease; border-radius: 8px;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--glass-border);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                Last Updated: ${item.lastUpdated}
+                            </div>
+                            ${item.status === "LOW_STOCK" || item.status === "OUT_OF_STOCK" 
+                                ? `<div style="font-size: 0.75rem; color: var(--warning); font-weight: 600;">⚠️ Reorder Recommended</div>`
+                                : item.status === "OVERSTOCKED"
+                                ? `<div style="font-size: 0.75rem; color: var(--warning); font-weight: 600;">📦 Overstock Alert</div>`
+                                : `<div style="font-size: 0.75rem; color: var(--success); font-weight: 600;">✓ Stock Healthy</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Agent Status Data
+        const agents = [
+            {
+                id: "agent-1",
+                name: "Inbound Gatekeeper",
+                role: "Box Inspection",
+                status: "ACTIVE",
+                description: "Inspects boxes for damage, water damage, and shipping readiness",
+                tools: ["inspect_box", "inspect_batch"],
+                processed: 892,
+                successRate: 99.2
+            },
+            {
+                id: "agent-2",
+                name: "QC Specialist",
+                role: "VAS Label Verification",
+                status: "ACTIVE",
+                description: "Verifies label text matches visual object using OCR and Vision AI",
+                tools: ["verify_vas_label"],
+                processed: 1103,
+                successRate: 98.7
+            },
+            {
+                id: "agent-3",
+                name: "GACWare Specialist",
+                role: "WMS Integration",
+                status: "ACTIVE",
+                description: "Checks order details in warehouse management system",
+                tools: ["check_wms"],
+                processed: 456,
+                successRate: 100.0
+            },
+            {
+                id: "agent-4",
+                name: "Fulfillment Specialist",
+                role: "Exception Handling",
+                status: "ACTIVE",
+                description: "Handles exceptions, holds orders, sends alerts, creates tickets",
+                tools: ["handle_exception"],
+                processed: 23,
+                successRate: 95.7
+            },
+            {
+                id: "agent-5",
+                name: "Hub Director",
+                role: "Orchestration",
+                status: "ACTIVE",
+                description: "Coordinates all agents and manages workflow",
+                tools: ["orchestrate", "route", "coordinate"],
+                processed: 1247,
+                successRate: 98.5
+            }
+        ];
+
+        function renderAgentStatus() {
+            const agentStatusList = document.getElementById('agentStatusList');
+            agentStatusList.innerHTML = agents.map(agent => {
+                const statusColor = agent.status === "ACTIVE" ? "var(--success)" : "var(--error)";
+                const statusBg = agent.status === "ACTIVE" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)";
+                
+                return `
+                    <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);">${agent.name}</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">${agent.role}</div>
+                                </div>
+                                <div style="background: ${statusBg}; border: 1px solid ${statusColor}; border-radius: 8px; padding: 0.4rem 0.8rem;">
+                                    <div style="font-size: 0.75rem; font-weight: 600; color: ${statusColor};">
+                                        ${agent.status === "ACTIVE" ? "●" : "○"} ${agent.status}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+                                ${agent.description}
+                            </div>
+                            <div style="display: flex; gap: 1.5rem; margin-bottom: 0.75rem;">
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Processed</div>
+                                    <div style="font-weight: 600; color: var(--primary);">${agent.processed.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Success Rate</div>
+                                    <div style="font-weight: 600; color: var(--success);">${agent.successRate}%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Tools:</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                    ${agent.tools.map(tool => `
+                                        <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.75rem; color: var(--primary); font-family: 'Fira Code', monospace;">
+                                            ${tool}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderProcessFlow() {
+            const processFlow = document.getElementById('processFlow');
+            
+            const flowSteps = [
+                { id: 1, name: "Inbound Receipt", agent: "Inbound Gatekeeper", icon: "📦", color: "var(--primary)" },
+                { id: 2, name: "Box Inspection", agent: "Inbound Gatekeeper", icon: "🔍", color: "var(--primary)" },
+                { id: 3, name: "Label Verification", agent: "QC Specialist", icon: "🏷️", color: "var(--secondary)" },
+                { id: 4, name: "WMS Check", agent: "GACWare Specialist", icon: "📋", color: "var(--success)" },
+                { id: 5, name: "Exception Handling", agent: "Fulfillment Specialist", icon: "⚠️", color: "var(--warning)" },
+                { id: 6, name: "Approval & Ship", agent: "Hub Director", icon: "✅", color: "var(--success)" }
+            ];
+
+            processFlow.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; position: relative;">
+                    ${flowSteps.map((step, index) => `
+                        <div style="display: flex; align-items: center; gap: 1.5rem; position: relative;">
+                            <div style="flex-shrink: 0; width: 60px; height: 60px; background: ${step.color}20; border: 2px solid ${step.color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; position: relative; z-index: 2;">
+                                ${step.icon}
+                            </div>
+                            <div style="flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem;">
+                                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem;">${step.name}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">${step.agent}</div>
+                            </div>
+                            ${index < flowSteps.length - 1 ? `
+                                <div style="position: absolute; left: 29px; top: 60px; width: 2px; height: calc(100% + 1.5rem); background: linear-gradient(180deg, ${step.color}, ${flowSteps[index + 1].color}); z-index: 1;"></div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Animate stats on load
+        function animateStats() {
+            const stats = {
+                totalProcessed: 1247,
+                successRate: 98.5,
+                activeAgents: 5,
+                avgProcessingTime: 2.3,
+                boxesInspected: 892,
+                labelsVerified: 1103,
+                exceptionsHandled: 23,
+                wmsChecks: 456
+            };
+
+            Object.keys(stats).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    const target = stats[key];
+                    let current = 0;
+                    const increment = target / 30;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        if (key === 'successRate' || key === 'avgProcessingTime') {
+                            element.textContent = current.toFixed(1) + (key === 'successRate' ? '%' : 's');
+                        } else {
+                            element.textContent = Math.floor(current).toLocaleString();
+                        }
+                    }, 50);
+                }
+            });
+        }
+
+        // Initialize everything on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderInventory();
+            renderAgentStatus();
+            renderProcessFlow();
+            setTimeout(animateStats, 500);
+        });
+    </script>
+</body>
+
+</html>

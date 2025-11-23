@@ -1,0 +1,221 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Supply Chain Box Inspection API",
+    "description": "Simple box condition inspection for supply chain logistics",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://YOUR-NGROK-URL.ngrok-free.app",
+      "description": "Production server (update with your ngrok URL)"
+    }
+  ],
+  "paths": {
+    "/inspect/box": {
+      "post": {
+        "operationId": "inspectBox",
+        "summary": "Inspect box condition",
+        "description": "Analyzes box condition and determines if it's safe to ship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoxInspectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inspection result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoxInspectionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/inspect/batch": {
+      "post": {
+        "operationId": "inspectBatch",
+        "summary": "Batch box inspection",
+        "description": "Inspect multiple boxes at once",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch inspection results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BoxInspectionRequest": {
+        "type": "object",
+        "required": ["image_url"],
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "description": "URL of the box image to inspect"
+          },
+          "shipment_id": {
+            "type": "string",
+            "description": "Optional shipment ID",
+            "default": "UNKNOWN"
+          },
+          "expected_condition": {
+            "type": "string",
+            "description": "Expected condition",
+            "default": "good"
+          }
+        }
+      },
+      "DefectFinding": {
+        "type": "object",
+        "properties": {
+          "defect_type": {
+            "type": "string",
+            "enum": ["crushed", "torn", "water_damage", "missing_label", "structural_damage"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          },
+          "location": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "float"
+          },
+          "recommended_action": {
+            "type": "string"
+          }
+        }
+      },
+      "BoxInspectionResult": {
+        "type": "object",
+        "properties": {
+          "shipment_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "box_condition": {
+            "type": "string",
+            "enum": ["GOOD", "DAMAGED", "CRITICAL"]
+          },
+          "total_defects": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectFinding"
+            }
+          },
+          "can_ship": {
+            "type": "boolean"
+          },
+          "reasoning": {
+            "type": "string"
+          }
+        }
+      },
+      "BatchResult": {
+        "type": "object",
+        "properties": {
+          "total_boxes": {
+            "type": "integer"
+          },
+          "good_boxes": {
+            "type": "integer"
+          },
+          "damaged_boxes": {
+            "type": "integer"
+          },
+          "can_ship_count": {
+            "type": "integer"
+          },
+          "ship_rate": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoxInspectionResult"
+            }
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "gemini_configured": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+

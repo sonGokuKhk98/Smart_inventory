@@ -1,0 +1,15 @@
+# Cloud-based Detection Dependencies
+
+# Roboflow (Recommended - Pre-trained warehouse model)
+inference-sdk>=1.0.0
+
+# Replicate (Alternative - Grounding DINO)
+replicate>=0.25.0
+
+# Common dependencies
+python-dotenv>=1.0.0
+requests>=2.28.0
+Pillow>=9.0.0
+
+
+
