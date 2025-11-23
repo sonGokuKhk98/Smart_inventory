@@ -144,6 +144,132 @@ ngrok http 8000
 3. Set system prompt (see `PROFESSIONAL_AGENT_TESTS.md` for test scenarios)
 4. Test with demo images (see `TEST_SCENARIOS.md` for comprehensive test cases)
 
+## 🚀 Deployment to Render
+
+### Prerequisites
+- GitHub account with your repository pushed
+- Render account (free tier available at [render.com](https://render.com))
+- Google Gemini API Key
+
+### Step-by-Step Deployment
+
+#### Option 1: Using render.yaml (Recommended)
+
+1. **Push your code to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Add Render deployment configuration"
+   git push origin main
+   ```
+
+2. **Connect to Render:**
+   - Go to [render.com](https://render.com) and sign up/login
+   - Click "New +" → "Blueprint"
+   - Connect your GitHub repository
+   - Render will automatically detect `render.yaml` and create the service
+
+3. **Set Environment Variables:**
+   - In Render dashboard, go to your service → Environment
+   - Add `GEMINI_API_KEY` with your API key value
+   - Render automatically sets `PORT` (no need to configure)
+
+4. **Deploy:**
+   - Render will automatically build and deploy
+   - Wait for deployment to complete (usually 2-5 minutes)
+   - Your app will be live at `https://your-service-name.onrender.com`
+
+#### Option 2: Manual Setup
+
+1. **Create New Web Service:**
+   - Go to Render Dashboard → "New +" → "Web Service"
+   - Connect your GitHub repository
+
+2. **Configure Service:**
+   - **Name:** `visionflow-backend` (or your preferred name)
+   - **Environment:** `Python 3`
+   - **Region:** Choose closest to you (Oregon recommended)
+   - **Branch:** `main` (or your default branch)
+   - **Root Directory:** Leave empty (root of repo)
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `python backend/main_supply_chain.py`
+
+3. **Set Environment Variables:**
+   - Click "Environment" tab
+   - Add:
+     - `GEMINI_API_KEY` = `your-gemini-api-key-here`
+   - Note: `PORT` is automatically set by Render
+
+4. **Deploy:**
+   - Click "Create Web Service"
+   - Render will build and deploy automatically
+   - Monitor logs for any errors
+
+### Post-Deployment
+
+1. **Update watsonx Orchestrate:**
+   - Get your Render URL: `https://your-service-name.onrender.com`
+   - Update the OpenAPI spec server URL in watsonx Orchestrate:
+     - Go to Skills → Edit your skill
+     - Update server URL to your Render URL
+   - Or use the Render URL directly: `https://your-service-name.onrender.com/openapi.json`
+
+2. **Test the Deployment:**
+   - Visit `https://your-service-name.onrender.com/` → Should show frontend
+   - Visit `https://your-service-name.onrender.com/docs` → Should show API docs
+   - Test an API endpoint: `https://your-service-name.onrender.com/inspect/box`
+
+3. **Update Frontend (if needed):**
+   - The frontend is automatically served from the root URL
+   - All API calls use relative URLs, so they work automatically
+
+### Render Configuration Files
+
+The repository includes:
+- **`render.yaml`**: Infrastructure as Code configuration
+- **`Procfile`**: Alternative deployment method (if not using render.yaml)
+
+### Important Notes
+
+- **Free Tier Limitations:**
+  - Services spin down after 15 minutes of inactivity
+  - First request after spin-down may take 30-60 seconds
+  - Upgrade to paid plan for always-on service
+
+- **Environment Variables:**
+  - Never commit API keys to Git
+  - Always set them in Render dashboard
+  - Use Render's environment variable sync for team members
+
+- **Health Checks:**
+  - Render uses `/docs` endpoint as health check
+  - Service auto-restarts if health check fails
+
+- **Logs:**
+  - View logs in Render dashboard → Logs tab
+  - Useful for debugging deployment issues
+
+### Troubleshooting
+
+**Build Fails:**
+- Check that `backend/requirements.txt` exists and is correct
+- Verify Python version (Render uses Python 3.11+ by default)
+- Check build logs for specific error messages
+
+**Service Won't Start:**
+- Verify `GEMINI_API_KEY` is set correctly
+- Check start command: `python backend/main_supply_chain.py`
+- Review logs for runtime errors
+
+**Frontend Not Loading:**
+- Ensure `frontend/index.html` exists in repository
+- Check that static file serving is configured in `main_supply_chain.py`
+- Verify root route (`/`) is serving the frontend
+
+**API Calls Fail:**
+- Check CORS settings (should allow all origins for public API)
+- Verify backend is running (check Render logs)
+- Test API directly: `https://your-service.onrender.com/docs`
+
 ## 🌐 Web Interface & User Flow
 
 ### Accessing the Dashboard

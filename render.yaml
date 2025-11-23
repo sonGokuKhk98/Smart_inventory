@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: visionflow-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: python backend/main_supply_chain.py
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /docs
+    autoDeploy: true
+

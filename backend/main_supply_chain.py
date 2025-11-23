@@ -6,6 +6,8 @@ Simplified but complete workflow
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import google.generativeai as genai
@@ -48,6 +50,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files from frontend directory
+frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    
+    @app.get("/")
+    async def serve_frontend():
+        """Serve the frontend HTML file"""
+        index_path = os.path.join(frontend_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"message": "Frontend not found. API is running. Visit /docs for API documentation."}
 
 # Initialize Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -1042,14 +1057,17 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
+    # Use PORT environment variable (provided by Render) or default to 8000
+    port = int(os.getenv("PORT", 8000))
     print("\n" + "="*60)
     print("📦 Supply Chain Logistics API")
     print("   Box Inspection + VAS Label Verification")
     print("="*60)
-    print(f"✅ Server starting on http://0.0.0.0:8000")
-    print(f"📖 API docs: http://localhost:8000/docs")
+    print(f"✅ Server starting on http://0.0.0.0:{port}")
+    print(f"📖 API docs: http://localhost:{port}/docs")
+    print(f"🌐 Frontend: http://localhost:{port}/")
     print("="*60 + "\n")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 

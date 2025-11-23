@@ -675,9 +675,11 @@
                 formData.append('order_id', 'ORD-' + Math.floor(Math.random() * 10000));
             }
 
+            // Use relative URLs for deployment compatibility
+            const baseUrl = window.location.origin;
             const endpoint = currentMode === 'inspect'
-                ? 'http://localhost:8000/inspect/box'
-                : 'http://localhost:8000/vas/verify_label';
+                ? `${baseUrl}/inspect/box`
+                : `${baseUrl}/vas/verify_label`;
 
             try {
                 const response = await fetch(endpoint, {
