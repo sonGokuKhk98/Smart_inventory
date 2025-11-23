@@ -16,11 +16,12 @@ Traditional logistics operations suffer from:
 - **Costly Returns:** Shipping wrong items costs 2x in shipping fees
 
 ## 💡 Solution
-VisionFlow uses **4 specialized AI agents** orchestrated by IBM watsonx to automate:
-1. **Inbound Cargo Inspection** - Detects damage using computer vision
-2. **Value-Added Services (VAS) Quality Control** - Verifies labels match products
-3. **Warehouse Management System (WMS) Integration** - Checks inventory in real-time
-4. **Operations Execution** - Generates RMAs and shipping manifests automatically
+VisionFlow uses **5 specialized AI agents** orchestrated by IBM watsonx to automate:
+1. **Inbound Gatekeeper** - Inspects cargo boxes for damage using computer vision
+2. **QC Specialist** - Verifies VAS labels match products using OCR + Vision AI
+3. **GACWare Specialist** - Integrates with WMS to check inventory in real-time
+4. **Fulfillment Specialist** - Handles exceptions, generates RMAs and shipping manifests
+5. **Hub Director** - Orchestrates all agents and manages end-to-end workflows
 
 ## 🏗️ Architecture
 
@@ -118,30 +119,230 @@ pip install -r backend/requirements.txt
 echo 'GEMINI_API_KEY=your_key_here' > .env
 
 # 4. Start the backend
-python3 backend/main.py
+python3 backend/main_supply_chain.py
 
-# 5. Start ngrok (in new terminal)
+# 5. Open the web interface (in browser)
+# Option A: Direct file open
+open frontend/index.html
+
+# Option B: Serve via HTTP (recommended)
+cd frontend
+python3 -m http.server 8080
+# Then visit http://localhost:8080
+
+# 6. Start ngrok (in new terminal) for watsonx Orchestrate
 ngrok http 8000
 
-# 6. Import openapi.json to watsonx Orchestrate
+# 7. Import openapi.json to watsonx Orchestrate
 # Visit http://localhost:8000/openapi.json
+# Or use the ngrok URL: https://your-ngrok-url.ngrok.io/openapi.json
 ```
 
 ### watsonx Orchestrate Configuration
-1. Go to Skills → Add Skill → Upload `openapi.json`
-2. Create Agent → Add all 4 skills
-3. Set system prompt (see `WATSONX_SETUP_GUIDE.md`)
-4. Test with demo images (see `DEMO_TEST_DATA.md`)
+1. Go to Skills → Add Skill → Upload `openapi.json` (or `openapi_supply_chain.json`)
+2. Create Agent → Add all available skills from the OpenAPI spec
+3. Set system prompt (see `PROFESSIONAL_AGENT_TESTS.md` for test scenarios)
+4. Test with demo images (see `TEST_SCENARIOS.md` for comprehensive test cases)
+
+## 🌐 Web Interface & User Flow
+
+### Accessing the Dashboard
+1. **Start the backend server:**
+   ```bash
+   python3 backend/main_supply_chain.py
+   ```
+
+2. **Open the web interface:**
+   - Navigate to `frontend/index.html` in your browser
+   - Or serve it via a local web server (recommended):
+     ```bash
+     cd frontend
+     python3 -m http.server 8080
+     # Then visit http://localhost:8080
+     ```
+
+### Dashboard Overview
+
+The VisionFlow Logistics Hub provides a modern, glassmorphism-inspired interface with the following sections:
+
+#### 1. **Header Section**
+- **Title:** VisionFlow Logistics Hub
+- **Quick Access:** "Open watsonx Chat" button → Redirects to IBM watsonx Orchestrate chat interface
+- **Purpose:** Direct access to the AI agent conversation interface
+
+#### 2. **Real-Time Statistics Dashboard**
+Displays live metrics with animated counters:
+- **Total Processed:** Overall items processed by the system
+- **Success Rate:** Percentage of successful operations
+- **Active Agents:** Number of currently active AI agents (5 agents)
+- **Avg Processing Time:** Average time per operation
+- **Detailed Metrics:**
+  - Boxes Inspected
+  - Labels Verified
+  - Exceptions Handled
+  - WMS Checks Performed
+
+#### 3. **Agent Architecture Section**
+Shows the multi-agent system status:
+- **5 Specialized Agents:**
+  1. **Inbound Gatekeeper** - Box inspection and damage detection
+  2. **QC Specialist** - VAS label verification
+  3. **GACWare Specialist** - WMS integration and inventory checks
+  4. **Fulfillment Specialist** - Exception handling and alerts
+  5. **Hub Director** - Orchestration and workflow coordination
+
+- **Agent Status Cards:** Display for each agent:
+  - Current status (ACTIVE/IDLE)
+  - Role description
+  - Tools available
+  - Processed count
+  - Success rate
+
+- **Process Flow Visualization:** Interactive diagram showing the 6-step logistics workflow:
+  1. Inbound Receipt → 2. Box Inspection → 3. Label Verification → 4. WMS Check → 5. Exception Handling → 6. Approval & Ship
+
+#### 4. **Image Analysis Section**
+Core functionality for uploading and analyzing images:
+
+**Two Modes:**
+- **Inspect Box Mode:** Analyze cargo for damage and shipping readiness
+- **Verify Label Mode:** Verify VAS labels match physical products
+
+**Workflow:**
+1. **Select Mode:** Click "Inspect Box" or "Verify Label" tab
+2. **Upload Image:**
+   - Drag & drop image onto upload zone, OR
+   - Click to browse and select file
+   - Preview appears in upload zone
+3. **Configure Options:**
+   - **Priority:** Standard / Rush / Critical
+   - **Expected SKU:** (Label mode only) Optional SKU to verify against
+4. **Submit:** Click "Analyze Shipment" or "Verify Label"
+5. **View Results:**
+   - Loading spinner during processing
+   - Results displayed in formatted card:
+     - Status badge (GOOD/DAMAGED/CRITICAL)
+     - Detailed findings list
+     - Reasoning and recommendations
+     - Timestamp
+
+**API Integration:**
+- **Inspect Box:** `POST /inspect/box` → Returns damage assessment
+- **Verify Label:** `POST /vas/verify_label` → Returns label match status
+
+#### 5. **Inventory Management Section**
+Real-time inventory dashboard with:
+
+**Summary Statistics:**
+- Total Items in inventory
+- Low Stock count (items below reorder point)
+- Out of Stock count
+
+**Detailed Inventory List:**
+Each item displays:
+- **SKU:** Product identifier
+- **Name:** Product description
+- **Stock Level:** Current quantity with visual progress bar
+- **Status Badge:** 
+  - 🟢 IN_STOCK (green)
+  - 🟡 LOW_STOCK (yellow)
+  - 🔴 OUT_OF_STOCK (red)
+  - 🔵 OVERSTOCKED (blue)
+- **Location:** Warehouse and bin location
+- **Last Updated:** Timestamp
+- **Recommendations:** Auto-generated suggestions (e.g., "Reorder soon", "Stock healthy")
+
+**Sample Inventory Items:**
+- Banner Landscape Design (BANNER-LANDSCAPE-001)
+- Image Assets (IMAGE-001)
+- Office Furniture (Office Chair, Desk Lamp)
+- Electronics (Monitors, Keyboards, Mice, Headphones)
+- And more...
+
+### Complete User Flow
+
+#### Scenario 1: Inspecting Inbound Cargo
+```
+1. User opens dashboard → Sees real-time stats
+2. Navigates to "Image Analysis" section
+3. Selects "Inspect Box" mode
+4. Uploads image of cargo box
+5. Sets priority (Standard/Rush/Critical)
+6. Clicks "Analyze Shipment"
+7. System processes via backend API → Gemini Vision AI
+8. Results displayed:
+   - Box condition (GOOD/DAMAGED/CRITICAL)
+   - List of defects found
+   - Shipping recommendation (can_ship: true/false)
+   - Reasoning and next steps
+```
+
+#### Scenario 2: Verifying VAS Labels
+```
+1. User selects "Verify Label" mode
+2. Uploads image of product with label
+3. Optionally enters expected SKU
+4. Clicks "Verify Label"
+5. System uses OCR + Vision AI to:
+   - Extract text from label
+   - Identify product visually
+   - Compare label text vs. visual product
+6. Results show:
+   - Match status (MATCH/MISMATCH)
+   - Extracted label text
+   - Visual product identification
+   - Recommendation (approve/reject)
+```
+
+#### Scenario 3: Monitoring Operations
+```
+1. User views "Real-Time Statistics" dashboard
+2. Sees live metrics updating:
+   - Total processed items
+   - Success rates
+   - Active agent count
+3. Checks "Agent Architecture" section:
+   - Views agent status and health
+   - Reviews process flow diagram
+4. Monitors "Inventory Management":
+   - Checks stock levels
+   - Identifies low stock items
+   - Reviews recommendations
+```
+
+### Integration with watsonx Orchestrate
+
+The web interface works in parallel with the watsonx Orchestrate chat:
+
+1. **Direct API Access:** Web UI calls backend APIs directly for quick image analysis
+2. **Agent Chat:** "Open watsonx Chat" button redirects to full agent conversation interface
+3. **Unified Backend:** Both interfaces use the same FastAPI backend endpoints
+4. **Real-Time Updates:** Dashboard stats reflect operations from both web UI and chat interface
+
+### UI Features
+
+- **Modern Design:** Glassmorphism with floating boxes, gradients, and smooth animations
+- **Responsive Layout:** Adapts to different screen sizes
+- **Real-Time Updates:** Statistics and agent status update dynamically
+- **Visual Feedback:** Loading states, status badges, progress bars
+- **Error Handling:** Clear error messages and retry options
+- **Accessibility:** High contrast, readable fonts, intuitive navigation
 
 ## 📁 Project Structure
 ```
 VisionFlow/
 ├── backend/
-│   ├── main.py              # FastAPI backend with 4 endpoints
+│   ├── main_supply_chain.py # FastAPI backend with supply chain endpoints
+│   ├── openapi.json         # OpenAPI specification for watsonx
 │   └── requirements.txt     # Python dependencies
-├── PRDs/                    # Product requirement documents
-├── DEMO_TEST_DATA.md        # Test scenarios with image URLs
-├── WATSONX_SETUP_GUIDE.md   # Step-by-step watsonx setup
+├── frontend/
+│   └── index.html           # Web dashboard UI (Logistics Hub)
+├── openapi_supply_chain.json # OpenAPI spec for supply chain API
+├── PROFESSIONAL_AGENT_TESTS.md  # Test scenarios for agents
+├── DEMO_MODE_GUIDE.md       # Demo mode instructions
+├── DEMO_SCRIPT.md           # Demo script template
+├── QUICK_TEST_COMMANDS.md   # Quick reference for testing
+├── TEST_SCENARIOS.md        # Comprehensive test scenarios
 ├── .env                     # API keys (not in repo)
 └── README.md                # This file
 ```
