@@ -477,9 +477,7 @@ VisionFlow/
 [Link to demo video]
 
 ## 🔗 Links
-- **Live Demo:** [If applicable]
-- **Presentation Slides:** [If applicable]
-- **watsonx Agent:** [Screenshot or link]
+https://lablab.ai/event/agentic-ai-hackathon-ibm-watsonx-orchestrate/gtransformers/watsonx-inspect-ai 
 
 ## 🏅 Why VisionFlow Wins
 
