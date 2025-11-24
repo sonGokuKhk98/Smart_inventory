@@ -1,4 +1,4 @@
-# VisionFlow - Autonomous Logistics Agent System
+# Watsonx - Autonomous Logistics Agent System
 
 ## 🏆 Hackathon Submission
 **Event:** Agentic AI Hackathon with IBM watsonx Orchestrate  
@@ -6,7 +6,7 @@
 **Date:** November 2025
 
 ## 📋 Overview
-VisionFlow is a multi-agent AI system built on **IBM watsonx Orchestrate** that automates critical logistics workflows by bridging the gap between physical inspection and digital systems. Using computer vision (Google Gemini 2.5 Flash) and intelligent orchestration, VisionFlow eliminates manual data entry, reduces errors, and accelerates warehouse operations.
+Watsonx - Autonomous Logistics Agent System is a multi-agent AI system built on **IBM watsonx Orchestrate** that automates critical logistics workflows by bridging the gap between physical inspection and digital systems. Using computer vision (Google Gemini 2.5 Flash) and intelligent orchestration, VisionFlow eliminates manual data entry, reduces errors, and accelerates warehouse operations.
 
 ## 🎯 Problem Statement
 Traditional logistics operations suffer from:
@@ -313,7 +313,7 @@ Shows the multi-agent system status:
 - **5 Specialized Agents:**
   1. **Inbound Gatekeeper** - Box inspection and damage detection
   2. **QC Specialist** - VAS label verification
-  3. **GACWare Specialist** - WMS integration and inventory checks
+  3. **Ware Specialist** - WMS integration and inventory checks
   4. **Fulfillment Specialist** - Exception handling and alerts
   5. **Hub Director** - Orchestration and workflow coordination
 
@@ -505,8 +505,8 @@ VisionFlow/
 - [ ] Multi-language support for global warehouses
 
 ## 👥 Team
-[Your Name] - [Role]  
-[Contact: email/LinkedIn]
+Hitesh Kaushik - Lead data engineer 
+Contact : hiteshkhk0105@gmail.com
 
 ## 📄 License
 MIT License
